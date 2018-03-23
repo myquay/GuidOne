@@ -9,11 +9,11 @@ This library implements the following GUID generation algorithms specified in [R
 * Version 1: Date-time and MAC address GUID
 * Version 3: MD5 hash & namespace
 * Version 4: Random
-* Version 5: HA-1 hash & namespace
+* Version 5: SHA-1 hash & namespace
 
 Visit [my blog for a 3-part series](https://michael-mckenna.com/tag/guid/) that dives into the secret world of GUIDs: https://michael-mckenna.com/tag/guid/
 
-##Usage
+## Usage
 
 ``` C#
 var guidV1 = UUID.V1(); //Generate a V1 GUID for current time + random node
