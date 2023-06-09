@@ -1,32 +1,36 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace GuidOne.Providers
 {
     /// <summary>
     /// Provide support for quicker pseudo-random numbers as well as support for cryptographically strong random numbers 
     /// </summary>
-    public partial class RandomNumberProvider
+    internal static class RandomNumberProvider
     {
-        private RandomNumberMode _mode { get; set; }
-        public RandomNumberMode Mode { get { return _mode; } }
 
-        private static Random _pseudoRandom = new Random();
-
-        public RandomNumberProvider(RandomNumberMode mode = RandomNumberMode.Crypro)
+        internal static void FillBytes(byte[] bytes, RandomNumberMode mode = RandomNumberMode.Crypto)
         {
-            _mode = mode;
-        }
-
-        public void FillBytes(byte[] bytes)
-        {
-            if (Mode == RandomNumberMode.Pseudo)
+            if (mode == RandomNumberMode.Pseudo)
             {
-                _pseudoRandom.NextBytes(bytes);
+                    new Random().NextBytes(bytes);
             }
             else
             {
-                FillCryptoBytes(bytes);
+                using (var cryptoProvider = new RNGCryptoServiceProvider())
+                {
+                    cryptoProvider.GetBytes(bytes);
+                }
             }
+        }
+
+        internal static byte[] GetRandomBytes(int length, RandomNumberMode mode = RandomNumberMode.Crypto)
+        {
+            var bytes = new byte[length];
+            RandomNumberProvider.FillBytes(bytes, mode);
+            return bytes;
         }
     }
 }

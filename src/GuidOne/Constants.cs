@@ -7,10 +7,10 @@ namespace GuidOne
     /// <summary>
     /// Random number generate modes supported
     /// </summary>
-    public enum RandomNumberMode { Pseudo = 1, Crypro = 2 }
+    public enum RandomNumberMode { Pseudo = 1, Crypto = 2 }
 
     /// <summary>
-    /// Default GUID namespaces for V3 and V5 GUIDs from the spec
+    /// Default GUID namespaces for V3 and V5 GUIDs from the RFC
     /// </summary>
     public static class GuidNamespaces
     {
@@ -20,6 +20,9 @@ namespace GuidOne
         public static Guid X500_DN = Guid.Parse("6ba7b814-9dad-11d1-80b4-00c04fd430c8");
     }
 
+    /// <summary>
+    /// Constants from the RFC
+    /// </summary>
     public static class Constants
     {
         /// <summary>
@@ -48,10 +51,10 @@ namespace GuidOne
         public const int TIMESTAMP_BYTE_INDEX = 0;
 
         /// <summary>
-        /// The posistion of the version byte
+        /// The position of the version byte
         /// </summary>
         /// <remarks>
-        /// In C# this depends on endianess due to the internal structure .NET stores GUIDs in
+        /// In C# this depends on endianness due to the internal structure .NET stores GUIDs in
         /// </remarks>
         public static int VERSION_BYTE_INDEX
         {
@@ -80,7 +83,7 @@ namespace GuidOne
         public const int NODE_BYTE_INDEX = 10;
 
         /// <summary>
-        /// Offset from .NET 0 from Greorian 0
+        /// Offset from .NET 0 from Gregorian 0
         /// </summary>
         public static DateTimeOffset GREGORIAN_CALENDAR_OFFSET
         {

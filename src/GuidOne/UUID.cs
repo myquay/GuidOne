@@ -1,26 +1,27 @@
 ﻿using GuidOne.Providers;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Net.NetworkInformation;
+using System.Net;
 using System.Text;
 
 namespace GuidOne
 {
     public enum GuidVersion { Unknown = 0, Time = 1, DCE = 2, MD5 = 3, Random = 4, SHA1 = 5 }
     public enum GuidVariant { Unknown = 0, NCSReserved = 1, RFC4122 = 2, MicrosoftReserved = 3, FutureReserved = 4 }
-    public enum GenerationMode { Fast = 1, NoDuplicates = 2 }
 
     /// <summary>
-    /// Factory for generating GUIDs
+    /// UUID (Universally Unique Identifier) is a 128-bit number used to uniquely identify some object or entity on the Internet.
     /// </summary>
-    /// <seealso cref="http://www.ietf.org/rfc/rfc4122.txt">A Universally Unique IDentifier (UUID) URN Namespace</seealso>
-    public partial class UUID
+    /// <seealso cref="http://www.ietf.org/rfc/rfc4122.txt">A Universally Unique Identifier (UUID) URN Namespace</seealso>
+    public struct Uuid : IFormattable, IComparable, IComparable<Uuid>, IEquatable<Uuid>
     {
-        private static object _lock = new object();
 
         /// <summary>
         /// Internal representation of the GUID
         /// </summary>
-        private Guid _guid { get; set; }
+        private Guid _guid;
 
         /// <summary>
         /// Extract the GUID Version
@@ -81,25 +82,22 @@ namespace GuidOne
             get
             {
                 if (Version != GuidVersion.Time)
-                {
                     return null;
-                }
 
                 var guidBytes = _guid.ToByteArray();
 
                 if (BitConverter.IsLittleEndian)
-                    ToggleEndianess(guidBytes);
+                    ToggleEndianness(guidBytes);
 
                 var timeHigh = new byte[2];
                 var timeMid = new byte[2];
                 var timeLow = new byte[4];
 
-                Array.Copy(guidBytes,6, timeHigh, 0, 2);
+                Array.Copy(guidBytes, 6, timeHigh, 0, 2);
                 Array.Copy(guidBytes, 4, timeMid, 0, 2);
                 Array.Copy(guidBytes, 0, timeLow, 0, 4);
 
                 timeHigh[0] &= 0x07;
-
 
                 var timeBytes = new byte[8];
                 Array.Copy(timeHigh, 0, timeBytes, 0, 2);
@@ -116,105 +114,24 @@ namespace GuidOne
         }
 
         /// <summary>
-        /// Current clock sequence bytes
+        /// Nil Uuid
         /// </summary>
-        private static byte[] V1ClockSequenceBytes { get; set; }
-
-        /// <summary>
-        /// Current node bytes
-        /// </summary>
-        private static byte[] V1NodeBytes { get; set; }
-
-        /// <summary>
-        /// When the last GUID was generated
-        /// </summary>
-        private static DateTime V1_LAST_TIMESTAMP_NO_DUPLICATES = DateTime.UtcNow;
-
-        /// <summary>
-        /// The random number provider used in V4 GUIDs
-        /// </summary>
-        private static RandomNumberProvider _randomNumberGenerator = new RandomNumberProvider();
-
-        /// <summary>
-        /// Generation mode (whether to ensure no duplicates or not at the cost of speed)
-        /// </summary>
-        public static GenerationMode V1_GenerationMode = GenerationMode.NoDuplicates;
-
-        /// <summary>
-        /// Whether to use cryptographically secure random numbers or not
-        /// </summary>
-        public static RandomNumberMode RandomNumberMode
-        {
-            get
-            {
-                return _randomNumberGenerator.Mode;
-            }
-            set
-            {
-                _randomNumberGenerator = new RandomNumberProvider(RandomNumberMode);
-            }
-        }
-
-        /// <summary>
-        /// Initialise clock sequence and node bytes to a random value when first created
-        /// </summary>
-        static UUID()
-        {
-            V1ClockSequenceBytes = GenerateClockSequenceBytes();
-            V1NodeBytes = GenerateNodeBytes();
-        }
-
-        /// <summary>
-        /// UUID Constructor from GUID
-        /// </summary>
-        /// <param name="guid"></param>
-        public UUID(Guid? guid = null)
-        {
-            if (guid == null)
-                _guid = Guid.Empty;
-            else
-                _guid = guid.Value;
-        }
+        public static Uuid Nil => new Uuid(Guid.Empty);
 
         /// <summary>
         /// UUID Constructor from string
         /// </summary>
         /// <param name="uuid"></param>
-        public UUID(string uuid)
+        public Uuid(Guid guid)
         {
-            _guid = Guid.Parse(uuid);
+            _guid = guid;
         }
 
         /// <summary>
         /// Create a new nil UUID
         /// </summary>
         /// <returns></returns>
-        public static UUID Nil()
-        {
-            return new UUID();
-        }
-
-        /// <summary>
-        /// Generate random clocksquence bytes
-        /// </summary>
-        /// <returns></returns>
-        private static byte[] GenerateClockSequenceBytes()
-        {
-            var bytes = new byte[2];
-            _randomNumberGenerator.FillBytes(bytes);
-            return bytes;
-        }
-
-        /// <summary>
-        /// Generate random node bytes
-        /// </summary>
-        /// <returns></returns>
-        private static byte[] GenerateNodeBytes()
-        {
-            var node = new byte[6];
-            _randomNumberGenerator.FillBytes(node);
-            return node;
-        }
+        public static Uuid NIL => new Uuid();
 
         #region UUID V1
 
@@ -222,71 +139,39 @@ namespace GuidOne
         /// Generate a new V1 GUID using the current timestamp and random node bytes
         /// </summary>
         /// <returns></returns>
-        public static UUID V1()
-        {
-            return V1(DateTime.UtcNow);
-        }
+        public static Uuid NewV1() => Uuid.NewV1(DateTime.UtcNow);
 
         /// <summary>
         /// Generate a new V1 GUID using a specific time and random node bytes
         /// </summary>
         /// <param name="dateTime">Time to use in the V1 GUID</param>
         /// <returns></returns>
-        public static UUID V1(DateTime dateTime)
-        {
-            return V1(DateTimeToTimeBytes(dateTime), DateTimeToClockSequenceBytes(dateTime));
-        }
+        public static Uuid NewV1(DateTime dateTime) => Uuid.NewV1(dateTime, RandomNumberProvider.GetRandomBytes(Constants.CLOCK_SEQUENCE_BYTES_LENGTH));
 
         /// <summary>
-        /// Generate a new V1 GUID from specified time and clocksequence bytes
+        /// Generate a new V1 GUID from specified time and clock sequence bytes
         /// </summary>
         /// <param name="timeBytes">Bytes for the time value to use in the V1 GUID</param>
         /// <param name="clockSequenceBytes">Clock sequence bytes to use the the V1 GUID</param>
         /// <returns></returns>
-        public static UUID V1(byte[] timeBytes, byte[] clockSequenceBytes)
-        {
-            return V1(timeBytes, clockSequenceBytes, V1NodeBytes);
-        }
+        public static Uuid NewV1(DateTime dateTime, byte[] clockSequenceBytes) => Uuid.NewV1(dateTime, clockSequenceBytes, RandomNumberProvider.GetRandomBytes(Constants.NODE_BYTES_LENGTH));
 
         /// <summary>
-        /// Generate a new V1 GUID from specified time, clocksequence bytes and node bytes
+        /// Generate a new V1 GUID from specified time, clock sequence bytes and node bytes
+        /// </summary>
+        /// <param name="timeBytes">Bytes for the time value to use in the V1 GUID</param>
+        /// <param name="clockSequenceBytes">Clock sequence bytes to use the the V1 GUID</param>
+        /// <returns></returns>
+        public static Uuid NewV1(DateTime dateTime, byte[] clockSequenceBytes, byte[] nodeBytes)  => Uuid.NewV1(DateTimeToTimeBytes(dateTime), clockSequenceBytes, nodeBytes);
+
+        /// <summary>
+        /// Generate a new V1 GUID from specified time, clock sequence bytes and node bytes
         /// </summary>
         /// <param name="timeBytes">Bytes for the time value to use in the V1 GUID</param>
         /// <param name="clockSequenceBytes">Clock sequence bytes to use the the V1 GUID</param>
         /// <param name="nodeBytes">Node bytes to use in the V1 GUID</param>
         /// <returns></returns>
-        public static UUID V1(byte[] timeBytes, byte[] clockSequenceBytes, byte[] nodeBytes)
-        {
-            return GenerateFromComponents(timeBytes, clockSequenceBytes, nodeBytes, GuidVersion.Time, GuidVariant.RFC4122);
-        }
-        
-        /// <summary>
-        /// If generation mode is "No Duplicates" then clocksequence bytes will be regenerated if timestamp is ever the same or gone backwards
-        /// </summary>
-        /// <param name="dateTime">The time the current V1 UUID is being generated for</param>
-        /// <returns></returns>
-        private static byte[] DateTimeToClockSequenceBytes(DateTime dateTime)
-        {
-            switch (V1_GenerationMode)
-            {
-                case GenerationMode.Fast:
-                    return V1ClockSequenceBytes;
-
-                case GenerationMode.NoDuplicates:
-                default:
-                    lock (_lock)
-                    {
-                        if (dateTime <= V1_LAST_TIMESTAMP_NO_DUPLICATES)
-                        {
-                            V1ClockSequenceBytes = GenerateClockSequenceBytes();
-                        }
-
-                        V1_LAST_TIMESTAMP_NO_DUPLICATES = dateTime;
-
-                        return V1ClockSequenceBytes;
-                    }
-            }
-        }
+        public static Uuid NewV1(byte[] timeBytes, byte[] clockSequenceBytes, byte[] nodeBytes) =>  GenerateFromComponents(timeBytes, clockSequenceBytes, nodeBytes, GuidVersion.Time, GuidVariant.RFC4122);
 
         /// <summary>
         /// Convert a timestamp to bytes
@@ -295,10 +180,11 @@ namespace GuidOne
         /// <returns></returns>
         private static byte[] DateTimeToTimeBytes(DateTime dateTime)
         {
-            var timeBytes = new byte[8];
-            var bytesToCopy = BitConverter.GetBytes(dateTime.Ticks - Constants.GREGORIAN_CALENDAR_OFFSET.Ticks); //Since .NET time is from 0, minus all the extra ticks
+            var timeBytes = new byte[Constants.TIME_BYTES_LENGTH];
 
-            Array.Copy(bytesToCopy, 0, timeBytes, 0, Math.Min(8, timeBytes.Length));
+            var bytesToCopy = BitConverter.GetBytes(dateTime.Ticks - Constants.GREGORIAN_CALENDAR_OFFSET.Ticks); //Since .NET time is from 0, minus all the extra ticks
+            Array.Copy(bytesToCopy, 0, timeBytes, 0, Math.Min(Constants.TIME_BYTES_LENGTH, timeBytes.Length));
+
             return timeBytes;
         }
 
@@ -312,7 +198,7 @@ namespace GuidOne
         /// <param name="namespaceId">The namespace we're generating the GUID in</param>
         /// <param name="name">The name we're generating the GUID for</param>
         /// <returns></returns>
-        public static UUID V3(Guid namespaceId, string name)
+        public static Uuid NewV3(Guid namespaceId, string name)
         {
             return GenerateNameBased(namespaceId, name, GuidVersion.MD5);
         }
@@ -322,18 +208,14 @@ namespace GuidOne
         #region UUID V4
 
         /// <summary>
-        /// Gemerate a random V4 GUID
+        /// Generate a random V4 GUID
         /// </summary>
         /// <returns></returns>
-        public static UUID V4()
+        public static Uuid NewV4()
         {
-            var timeBytes = new byte[Constants.TIME_BYTES_LENGTH];
-            var clockSequenceBytes = new byte[Constants.CLOCK_SEQUENCE_BYTES_LENGTH];
-            var nodeBytes = new byte[Constants.NODE_BYTES_LENGTH];
-
-            _randomNumberGenerator.FillBytes(timeBytes);
-            _randomNumberGenerator.FillBytes(clockSequenceBytes);
-            _randomNumberGenerator.FillBytes(nodeBytes);
+            var timeBytes = RandomNumberProvider.GetRandomBytes(Constants.TIME_BYTES_LENGTH);
+            var clockSequenceBytes = RandomNumberProvider.GetRandomBytes(Constants.CLOCK_SEQUENCE_BYTES_LENGTH);
+            var nodeBytes = RandomNumberProvider.GetRandomBytes(Constants.NODE_BYTES_LENGTH);
 
             return GenerateFromComponents(timeBytes, clockSequenceBytes, nodeBytes, GuidVersion.Random, GuidVariant.RFC4122);
         }
@@ -348,7 +230,7 @@ namespace GuidOne
         /// <param name="namespaceId">The namespace we're generating the GUID in</param>
         /// <param name="name">The name we're generating the GUID for</param>
         /// <returns></returns>
-        public static UUID V5(Guid namespaceId, string name)
+        public static Uuid NewV5(Guid namespaceId, string name)
         {
             return GenerateNameBased(namespaceId, name, GuidVersion.SHA1);
         }
@@ -364,10 +246,10 @@ namespace GuidOne
         /// <param name="name">The name we're generating the GUID for</param>
         /// <param name="version">The version to generate (MD5 or SHA1)</param>
         /// <returns></returns>
-        private static UUID GenerateNameBased(Guid namespaceId, string name, GuidVersion version)
+        private static Uuid GenerateNameBased(Guid namespaceId, string name, GuidVersion version)
         {
             if (version != GuidVersion.MD5 && version != GuidVersion.SHA1)
-                throw new ArgumentException("version", "Name based guids can only be version 3, or 5");
+                throw new ArgumentException("Name based GUIDs can only be version 3 (MD5), or 5 (SHA1)", nameof(version));
 
             if (String.IsNullOrEmpty(name))
                 throw new ArgumentNullException("name", "The name parameter cannot be empty or null");
@@ -376,14 +258,14 @@ namespace GuidOne
             byte[] namespaceBytes = namespaceId.ToByteArray();
 
             if (BitConverter.IsLittleEndian)
-                ToggleEndianess(namespaceBytes);
+                ToggleEndianness(namespaceBytes);
 
-            var hash = version == GuidVersion.MD5 ? 
+            var hash = version == GuidVersion.MD5 ?
                 HashProvider.GenerateMD5Hash(namespaceBytes, nameBytes) :
                 HashProvider.GenerateSHA1Hash(namespaceBytes, nameBytes);
 
             if (BitConverter.IsLittleEndian)
-                ToggleEndianess(hash);
+                ToggleEndianness(hash);
 
             return GenerateFromComponents(
                 hash.Skip(Constants.TIMESTAMP_BYTE_INDEX).Take(Constants.TIME_BYTES_LENGTH).ToArray(),
@@ -403,7 +285,7 @@ namespace GuidOne
         /// <param name="version">The GUID version</param>
         /// <param name="variant">The GUID variant</param>
         /// <returns></returns>
-        private static UUID GenerateFromComponents(byte[] timeBytes, byte[] clockSequenceBytes, byte[] nodeBytes, GuidVersion version, GuidVariant variant)
+        private static Uuid GenerateFromComponents(byte[] timeBytes, byte[] clockSequenceBytes, byte[] nodeBytes, GuidVersion version, GuidVariant variant)
         {
             var guidBytes = new byte[Constants.GUID_BYTES_LENGTH];
 
@@ -430,8 +312,8 @@ namespace GuidOne
             //To put in the variant, take the  9th byte and perform an and operation using  0x3f, followed by an or operation with 0x80.
 
             //Put in the version
-            int maskVariant = 0x3f;
-            int shiftVariant = 0;
+            int maskVariant;
+            int shiftVariant;
 
             switch (variant)
             {
@@ -457,8 +339,8 @@ namespace GuidOne
                     break;
             }
 
-            int maskVersion = 0x3f;
-            int shiftVersion = 0x3f;
+            int maskVersion;
+            int shiftVersion;
             switch (version)
             {
                 case GuidVersion.DCE:
@@ -493,9 +375,9 @@ namespace GuidOne
             guidBytes[Constants.VERSION_BYTE_INDEX] &= (byte)maskVersion;
             guidBytes[Constants.VERSION_BYTE_INDEX] |= (byte)shiftVersion;
 
-            return new UUID(new Guid(guidBytes));
+            return new Uuid(new Guid(guidBytes));
         }
-        
+
         /// <summary>
         /// Return as a .NET GUID
         /// </summary>
@@ -507,7 +389,7 @@ namespace GuidOne
 
         #region Helper methods to help us work with the correct byte order regardless of platform
 
-        private static void ToggleEndianess(byte[] guid)
+        private static void ToggleEndianness(byte[] guid)
         {
             SwitchBytes(guid, 0, 3);
             SwitchBytes(guid, 1, 2);
@@ -517,14 +399,32 @@ namespace GuidOne
 
         private static void SwitchBytes(byte[] guid, int left, int right)
         {
-            byte temp = guid[left];
-            guid[left] = guid[right];
-            guid[right] = temp;
+            (guid[right], guid[left]) = (guid[left], guid[right]);
+        }
+
+        public string ToString(string format, IFormatProvider formatProvider)
+        {
+            return ((IFormattable)_guid).ToString(format, formatProvider);
+        }
+
+        public int CompareTo(object obj)
+        {
+            return ((IComparable)_guid).CompareTo(obj);
+        }
+
+        public int CompareTo(Uuid other)
+        {
+            return AsGuid().CompareTo(other.AsGuid());
+        }
+
+        public bool Equals(Uuid other)
+        {
+            return AsGuid().Equals(other.AsGuid());
         }
 
         #endregion
 
     }
 
-    
+
 }
