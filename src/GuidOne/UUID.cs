@@ -127,12 +127,6 @@ namespace GuidOne
             _guid = guid;
         }
 
-        /// <summary>
-        /// Create a new nil UUID
-        /// </summary>
-        /// <returns></returns>
-        public static Uuid NIL => new Uuid();
-
         #region UUID V1
 
         /// <summary>
