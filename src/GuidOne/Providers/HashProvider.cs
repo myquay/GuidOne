@@ -16,7 +16,7 @@ namespace GuidOne.Providers
         {
             using (MD5 md5 = MD5.Create())
             {
-                return md5.ComputeHash(namespaceId.Concat(data).ToArray());
+                return md5.ComputeHash(namespaceId.Concat(data).ToArray()).Take(16).ToArray();
             }
         }
 
@@ -24,7 +24,7 @@ namespace GuidOne.Providers
         {
             using (SHA1 sha1 = SHA1.Create())
             {
-                return sha1.ComputeHash(namespaceId.Concat(data).ToArray());
+                return sha1.ComputeHash(namespaceId.Concat(data).ToArray()).Take(16).ToArray();
             }
         }
     }

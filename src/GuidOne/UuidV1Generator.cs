@@ -17,7 +17,7 @@ namespace GuidOne
         private readonly GenerationMode _generationMode;
         private readonly RandomNumberMode _randomNumberMode;
         private DateTime _lastTimeStampNoDuplicates;
-        private object _lock = new object();
+        private readonly object _lock = new object();
 
 
         public UuidV1Generator(RandomNumberMode randomNumberMode = RandomNumberMode.Crypto, GenerationMode generationMode = GenerationMode.NoDuplicates)
@@ -40,20 +40,14 @@ namespace GuidOne
         /// </summary>
         /// <param name="mac">The current machine's MAC address</param>
         /// <returns>A new UUID</returns>
-        public Uuid NewV1(PhysicalAddress mac)
-        {
-            return NewV1(DateTime.UtcNow, mac);
-        }
+        public Uuid NewV1(PhysicalAddress mac) => NewV1(DateTime.UtcNow, mac);
 
         /// <summary>
         /// Generate a V1 UUID using the device's IP address for the current time
         /// </summary>
         /// <param name="ip">The current machine's IP address</param>
         /// <returns>A new UUID</returns>
-        public Uuid NewV1(IPAddress ip)
-        {
-            return NewV1(DateTime.UtcNow, ip);
-        }
+        public Uuid NewV1(IPAddress ip) => NewV1(DateTime.UtcNow, ip);
 
         /// <summary>
         /// Generate a V1 UUID using the device's physical MAC address for a specific time

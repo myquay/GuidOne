@@ -5,6 +5,8 @@ VisualStudioVersion = 17.5.33530.505
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GuidOne", "src\GuidOne\GuidOne.csproj", "{0009680E-18BB-472A-B67F-3017FD25A99B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GuidOne.Tests", "src\GuidOne.Tests\GuidOne.Tests.csproj", "{2F9B0998-7D36-46B3-914A-2C08012C226A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{0009680E-18BB-472A-B67F-3017FD25A99B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0009680E-18BB-472A-B67F-3017FD25A99B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0009680E-18BB-472A-B67F-3017FD25A99B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F9B0998-7D36-46B3-914A-2C08012C226A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F9B0998-7D36-46B3-914A-2C08012C226A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F9B0998-7D36-46B3-914A-2C08012C226A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F9B0998-7D36-46B3-914A-2C08012C226A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
