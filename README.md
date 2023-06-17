@@ -26,7 +26,7 @@ var guidV5 = Uuid.NewV5(GuidNamespaces.DNS, "guid.one"); //Generate a V5 GUID fo
 var guid = guidV4.AsGuid(); //Convert to a standard .NET Guid
 ```
 
-## Inspecting GUIDs
+### Inspecting GUIDs
 
 ``` C#
 var uuid = new Uuid(Guid.Parse("63b00000-bfde-11d3-b852-290676ece2d7")); // Parse a UUID
@@ -36,7 +36,7 @@ var variant = uuid.Variant;
 var version = uuid.Timestamp; //Only for timebased Guids
 ```
 
-## Generating with no conflicts (locally)
+### Generating with no conflicts (locally)
 
 The timestamp GUIDs can conflict if generated too quickly, the library supports a slower mode of generation that makes sure there's no duplicates (non-distributed!)
 
