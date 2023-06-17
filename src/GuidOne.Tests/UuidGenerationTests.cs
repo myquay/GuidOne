@@ -1,6 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Linq;
+using System.Net;
 using System.Net.NetworkInformation;
 
 namespace GuidOne.Tests
@@ -80,6 +81,37 @@ namespace GuidOne.Tests
             Assert.AreEqual(uuid.Version, GuidVersion.SHA1);
             Assert.AreEqual(uuid.Variant, GuidVariant.RFC4122);
             Assert.IsNull(uuid.Timestamp);
+        }
+
+        [TestMethod]
+        public void VersionOneGeneratorNoDuplicates()
+        {
+            using (var v1Gen = new UuidV1Generator(generationMode: GenerationMode.NoDuplicates))
+            {
+                var guids = new Guid[100];
+                var now = DateTime.UtcNow;
+                for (int i = 0; i < 100; i++)
+                {
+                    guids[i] = v1Gen.NewV1(now, PhysicalAddress.Parse("29-06-76-EC-E2-D7")).AsGuid();
+                }
+                Assert.IsTrue(!guids.GroupBy(g => g).Where(g => g.Count() > 1).Any());
+            }
+        }
+
+
+        [TestMethod]
+        public void VersionOneGeneratorDuplicates()
+        {
+            using (var v1Gen = new UuidV1Generator(generationMode: GenerationMode.Fast))
+            {
+                var guids = new Guid[100];
+                var now = DateTime.UtcNow;
+                for (int i = 0; i < 100; i++)
+                {
+                    guids[i] = v1Gen.NewV1(now, PhysicalAddress.Parse("29-06-76-EC-E2-D7")).AsGuid();
+                }
+                Assert.IsTrue(guids.GroupBy(g => g).Where(g => g.Count() > 1).Any());
+            }
         }
 
     }
