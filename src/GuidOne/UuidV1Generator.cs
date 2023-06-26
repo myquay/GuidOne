@@ -5,6 +5,7 @@ using System.Net;
 using System.Text;
 using System.Security.Cryptography;
 using GuidOne.Providers;
+using System.Linq;
 
 namespace GuidOne
 {
@@ -13,7 +14,7 @@ namespace GuidOne
 
     public class UuidV1Generator : IDisposable
     {
-        private readonly byte[] _clockSequenceBytes = new byte[Constants.CLOCK_SEQUENCE_BYTES_LENGTH];
+        private byte[] _clockSequenceBytes = new byte[Constants.CLOCK_SEQUENCE_BYTES_LENGTH];
         private readonly GenerationMode _generationMode;
         private readonly RandomNumberMode _randomNumberMode;
         private DateTime _lastTimeStampNoDuplicates;
@@ -90,7 +91,13 @@ namespace GuidOne
                     lock (_lock)
                     {
                         if (dateTime <= _lastTimeStampNoDuplicates)
-                            RandomNumberProvider.FillBytes(_clockSequenceBytes, _randomNumberMode);
+                        {
+                            if (++_clockSequenceBytes[1] == byte.MaxValue)
+                            {
+                                _clockSequenceBytes[1] = 0;
+                                _clockSequenceBytes[0]++;
+                            }
+                        }
 
                         _lastTimeStampNoDuplicates = dateTime;
 

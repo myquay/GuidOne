@@ -88,9 +88,9 @@ namespace GuidOne.Tests
         {
             using (var v1Gen = new UuidV1Generator(generationMode: GenerationMode.NoDuplicates))
             {
-                var guids = new Guid[100];
+                var guids = new Guid[1000];
                 var now = DateTime.UtcNow;
-                for (int i = 0; i < 100; i++)
+                for (int i = 0; i < guids.Length; i++)
                 {
                     guids[i] = v1Gen.NewV1(now, PhysicalAddress.Parse("29-06-76-EC-E2-D7")).AsGuid();
                 }
