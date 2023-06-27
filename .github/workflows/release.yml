@@ -27,17 +27,16 @@ jobs:
       run: dotnet test
 
     - name: 📦 Pack NuGet package
-      run: dotnet pack -p VersionPrefix=${{github.event.release.tag_name}} -p ReleaseNotes="${{github.event.release.body}}"
+      run: dotnet pack -p VersionPrefix=${{github.event.release.tag_name}} -p ReleaseNotes="${{github.event.release.body}}" --configuration Release
 
     - name: 💾 Archive package
       uses: actions/upload-artifact@v3
       with:
         name: nuget-package
-        path: \a\*\GuidOne.*.nupkg
+        path: \home\runner\**\GuidOne.*.nupkg
 
     - name: 💾 Archive symbols package
       uses: actions/upload-artifact@v3
       with:
         name: nuget-package
-        path: \a\*\GuidOne.*.snupkg
-
+        path: \home\runner\**\GuidOne.*.snupkg
