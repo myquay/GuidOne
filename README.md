@@ -1,6 +1,6 @@
 # GuidOne
 
-Good one: the.NET GUID Generation library behind the project http://guid.one
+Good one: the .NET GUID Generation library behind the project http://guid.one
 
 This library implements the following GUID generation algorithms specified in [RFC 4122](http://www.ietf.org/rfc/rfc4122.txt) 
 
