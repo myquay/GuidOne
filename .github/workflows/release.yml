@@ -40,3 +40,17 @@ jobs:
       with:
         name: nuget-package
         path: /home/runner/work/GuidOne/GuidOne/src/GuidOne/bin/Release/GuidOne.*.snupkg
+
+    - name: 🛠️ Setup NuGet
+      uses: nuget/setup-nuget@v1
+      with:
+        nuget-api-key: ${{ secrets.NUGET_API_KEY }}
+        nuget-version: '5.x'
+    
+    - name: 🌐 Push NuGet package live
+      run: nuget push/home/runner/work/GuidOne/GuidOne/src/GuidOne/bin/Release/GuidOne.*.nupkg -src https://api.nuget.org/v3/index.json
+      shell: powershell
+    
+    - name: 🌐 Push NuGet symbol package live
+      run: nuget push /home/runner/work/GuidOne/GuidOne/src/GuidOne/bin/Release/GuidOne.*.snupkg -src https://api.nuget.org/v3/index.json
+      shell: powershell
