@@ -22,7 +22,7 @@ It supports both generating GUIDs as well as parsing them into their constituent
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/myquay/GuidOne.git</RepositoryUrl>
     <PackageReleaseNotes>$(ReleaseNotes)</PackageReleaseNotes>
-    <PackageTags>guid;guid generator;uuid</PackageTags>
+    <PackageTags>guid;generator;uuid</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
