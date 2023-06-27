@@ -33,10 +33,10 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: nuget-package
-        path: .\*\GuidOne.*.nupkg
+        path: /home/runner/work/GuidOne/GuidOne/src/GuidOne/bin/Release/GuidOne.*.nupkg
 
     - name: 💾 Archive symbols package
       uses: actions/upload-artifact@v3
       with:
         name: nuget-package
-        path: .\*\GuidOne.*.snupkg
+        path: /home/runner/work/GuidOne/GuidOne/src/GuidOne/bin/Release/GuidOne.*.snupkg
