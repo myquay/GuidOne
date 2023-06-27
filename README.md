@@ -1,8 +1,6 @@
 # GuidOne
 
-.NET GUID Generation library behind the project http://guid.one
-
-This library was built as a learning exercise to understand GUIDs - I've made the code available to anyone who is also interested under a permissive license.
+Good one: the.NET GUID Generation library behind the project http://guid.one
 
 This library implements the following GUID generation algorithms specified in [RFC 4122](http://www.ietf.org/rfc/rfc4122.txt) 
 
@@ -11,7 +9,7 @@ This library implements the following GUID generation algorithms specified in [R
 * Version 4: Random
 * Version 5: SHA-1 hash & namespace
 
-Visit my blog for a 3-part series that dives into the secret world of GUIDs: [https://michael-mckenna.com/what-the-guid](https://michael-mckenna.com/what-the-guid).
+It targets .NET Standard 2.0 for maximum compatibility. 
 
 ## Usage
 
@@ -36,7 +34,7 @@ var variant = uuid.Variant;
 var version = uuid.Timestamp; //Only for timebased Guids
 ```
 
-### Generating with no conflicts (locally)
+### Generating V1 Guids with no local conflicts
 
 The timestamp GUIDs can conflict if generated too quickly, the library supports a slower mode of generation that makes sure there's no duplicates (non-distributed!)
 
@@ -49,4 +47,7 @@ using (var v1Gen = new UuidV1Generator(generationMode: GenerationMode.NoDuplicat
 }
 ```
 
-_Note: This library was created just to investigate the inner workings of GUIDs and is not considered production ready_
+### More information
+
+Visit my blog for a 3-part series that dives into the secret world of GUIDs: [https://michael-mckenna.com/what-the-guid](https://michael-mckenna.com/what-the-guid).
+
