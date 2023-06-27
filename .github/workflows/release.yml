@@ -48,7 +48,7 @@ jobs:
         nuget-version: '5.x'
     
     - name: 🌐 Push NuGet package live
-      run: nuget push/home/runner/work/GuidOne/GuidOne/src/GuidOne/bin/Release/GuidOne.*.nupkg -src https://api.nuget.org/v3/index.json
+      run: nuget push /home/runner/work/GuidOne/GuidOne/src/GuidOne/bin/Release/GuidOne.*.nupkg -src https://api.nuget.org/v3/index.json
     
     - name: 🌐 Push NuGet symbol package live
       run: nuget push /home/runner/work/GuidOne/GuidOne/src/GuidOne/bin/Release/GuidOne.*.snupkg -src https://api.nuget.org/v3/index.json
