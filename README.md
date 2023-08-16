@@ -1,4 +1,4 @@
-# GuidOne
+# ![Project Logo](https://raw.githubusercontent.com/myquay/GuidOne/master/logo-sm.png) GuidOne
 
 Good one: the .NET GUID Generation library behind the project http://guid.one
 
